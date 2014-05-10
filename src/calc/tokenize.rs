@@ -7,14 +7,15 @@ of tokens.
 
 use std::str::Owned;
 use super::CalcResult;
-use super::expression::{ExprType, Add, Sub, Mul, Div};
+use super::expression::{ExprType, Function, Operator};
+use super::operator::{OperatorType, Add, Sub, Mul, Div}; 
 
 #[deriving(Show)]
 pub enum Token {
     Literal(f64),               // A number
     LPar,                       // A left parenthesis
     RPar,                       // A right parenthesis
-    Expression(ExprType),     // An Expression
+    Operator(OperatorType),     // An Expression
     Name(~str)                  // A name
 }
 
@@ -37,10 +38,10 @@ pub fn tokenize(s: &str) -> CalcResult<Vec<Token>> {
         let token = match slice.chars().next().unwrap() {
             '(' => Some(LPar),
             ')' => Some(RPar),
-            '+' => Some(Expression(Add)),
-            '-' => Some(Expression(Sub)),
-            '*' => Some(Expression(Mul)),
-            '/' => Some(Expression(Div)),
+            '+' => Some(Operator(Add)),
+            '-' => Some(Operator(Sub)),
+            '*' => Some(Operator(Mul)),
+            '/' => Some(Operator(Div)),
             _   => None
         };
         if token.is_some() {

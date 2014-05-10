@@ -9,8 +9,10 @@ expression is evaluated.
 use std::str;
 use std::str::{Slice, Owned};
 use super::{CalcResult, Evaluate, Number};
-use super::tokenize::{Token, Literal, LPar, RPar, Expression, Name};
-use super::expression::{Expression};
+use super::tokenize::{Token, Literal, LPar, RPar, Operator, Name};
+use super::expression;
+use super::expression::{Expression, Function};
+use super::function;
 
 pub fn translate(tokens: &[Token]) -> CalcResult<Box<Evaluate>> {
     // Check that the parentheses are good
@@ -19,12 +21,12 @@ pub fn translate(tokens: &[Token]) -> CalcResult<Box<Evaluate>> {
         _                        => return Err(Slice("Parentheses not present or wrongly formatted"))
     }
 
-    // There must be an Expression or a function name at the top of the expression
+    // There must be an operator or a function name at the top of the expression
     // We check here that it is present
     let top_expr = match tokens[1] {
-        Expression(expr_type) => expr_type,
-        Name(_)               => return Err(Slice("Functions are not yet supported")),
-        _                     => return Err(Slice("First Expression not present"))
+        Operator(op_type) => expression::Operator(op_type),
+        Name(ref func_name)   => Function(try!(function::from_str(func_name.as_slice()))),//return Err(Slice("Functions are not yet supported")),
+        _                 => return Err(Slice("Operator or function name not present at the beginning of the expression"))
     };
     
     // Here we will save the arguments of the expression
@@ -55,9 +57,9 @@ pub fn translate(tokens: &[Token]) -> CalcResult<Box<Evaluate>> {
                 // We make a new Expression based on the Expression type and the arguments
                 return Ok(box Expression{ expr_type: top_expr, args: args } as Box<Evaluate>);
             }
-            // Expression
-            Expression(op) => {
-                return Err(Owned(format!("Expression '{}' in wrong position", op)));
+            // Operator
+            Operator(op) => {
+                return Err(Owned(format!("Operator '{}' in wrong position", op)));
             }
             // A number to be used as argument for an Expression
             Literal(x) => {

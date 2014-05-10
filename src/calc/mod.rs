@@ -16,6 +16,8 @@ mod tokenize;
 mod translate;
 mod expression;
 mod number;
+mod operator;
+mod function;
 
 // A shortcut for the result type that is used everywhere
 pub type CalcResult<T = f64> = Result<T, str::MaybeOwned<'static>>;
