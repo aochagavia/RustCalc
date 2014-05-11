@@ -14,7 +14,7 @@ pub enum Token {
     Literal(f64),               // A number
     LPar,                       // A left parenthesis
     RPar,                       // A right parenthesis
-    Operator(OperatorType),     // An Expression
+    Operator(OperatorType),     // An operator
     Name(~str)                  // A name
 }
 

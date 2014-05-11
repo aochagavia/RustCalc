@@ -16,6 +16,7 @@ mod tokenize;
 mod translate;
 mod expression;
 mod number;
+mod constant;
 mod operator;
 mod function;
 

@@ -9,6 +9,7 @@ expression is evaluated.
 use std::str;
 use std::str::{Slice, Owned};
 use super::{CalcResult, Evaluate, Number};
+use super::constant::{Constant};
 use super::tokenize::{Token, Literal, LPar, RPar, Operator, Name};
 use super::expression;
 use super::expression::{Expression, Function};
@@ -67,8 +68,10 @@ pub fn translate(tokens: &[Token]) -> CalcResult<Box<Evaluate>> {
                 i += 1;
             }
             // The name of a constant
-            Name(_) => {
-                return Err(Slice("Constants are not yet implemented"));
+            Name(ref c_name) => {
+                let constant = box try!(Constant::from_str(c_name.as_slice()));
+                args.push(constant as Box<Evaluate>);
+                i += 1;
             }
         }
     }
