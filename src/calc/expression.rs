@@ -4,7 +4,6 @@ Implements an expression struct which can be evaluated.
 
 */
 
-use std::str::{Slice};
 use super::{CalcResult, Evaluate};
 use super::function;
 use super::function::FunctionType;
