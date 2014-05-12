@@ -47,9 +47,9 @@ pub fn tokenize(s: &str) -> CalcResult<Vec<Token>> {
             continue;
         }
         
-        // -----------------
-        // Literals and names
-        // -----------------
+        // ---------
+        // Operators
+        // ---------
         
         // We know that there is at least one word, so we can safely unwrap it
         let word = slice.words().next().unwrap();
@@ -57,8 +57,26 @@ pub fn tokenize(s: &str) -> CalcResult<Vec<Token>> {
         // Discard parentheses at the end if present
         let word = word.slice(0, word.find(|c: char| c == ')' || c == '(').unwrap_or(word.len()));
         
+        // Operators are always separated by whitespace from the restant tokens
+        let token = match word {
+            "+" => Some(Operator(Add)),
+            "-" => Some(Operator(Sub)),
+            "*" => Some(Operator(Mul)),
+            "/" => Some(Operator(Div)),
+            _   => None
+        };
+        if token.is_some() {
+            tokens.push(token.unwrap());
+            i += 1;
+            continue;
+        }
+        
+        // -----------------
+        // Literals and names
+        // -----------------
+        
         // We know that a word has at least one character, so we can safely unwrap it
-        let c = word.chars().next().expect(format!("Could not unwrap first char of word '{}'. Parsing on index {} of slice {}.", word, i, slice));
+        let c = word.chars().next().unwrap();
         
         // A literal token
         if c.is_digit() || c == '-' {        
@@ -76,24 +94,6 @@ pub fn tokenize(s: &str) -> CalcResult<Vec<Token>> {
         if c.is_alphabetic() {
             tokens.push(Name(word.to_owned()));
             i += word.len();
-            continue;
-        }
-        
-        // ---------
-        // Operators
-        // ---------
-        
-        // Operators are always separated by whitespace from the restant tokens
-        let token = match word {
-            "+" => Some(Operator(Add)),
-            "-" => Some(Operator(Sub)),
-            "*" => Some(Operator(Mul)),
-            "/" => Some(Operator(Div)),
-            _   => None
-        };
-        if token.is_some() {
-            tokens.push(token.unwrap());
-            i += 1;
             continue;
         }
 
