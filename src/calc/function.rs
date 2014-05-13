@@ -11,7 +11,8 @@ use super::{Evaluate, CalcResult};
 #[deriving(Show)]
 pub enum FunctionType {
     Sqrt,
-    Pow
+    Pow,
+    If
 }
 
 pub fn eval(f_type: FunctionType, args: &Vec<Box<Evaluate>>) -> CalcResult {
@@ -33,6 +34,20 @@ pub fn eval(f_type: FunctionType, args: &Vec<Box<Evaluate>>) -> CalcResult {
                 Ok(base.powf(exponent))
             }
         }
+        If => {
+            if args.len() != 3 {
+                Err(Slice("'if' requires three arguments"))
+            } else {
+                let condition = try!(args.get(0).eval());
+                
+                // 0 means false, other means true
+                if condition == 0. {
+                    Ok(try!(args.get(2).eval()))
+                } else {
+                    Ok(try!(args.get(1).eval()))
+                }
+            }
+        }
     }
 }
 
@@ -40,6 +55,7 @@ pub fn from_str(s: &str) -> CalcResult<FunctionType> {
     match s {
         "sqrt" => Ok(Sqrt),
         "pow"  => Ok(Pow),
+        "if"   => Ok(If),
         _      => Err(Owned(format!("Unknown function '{}'", s)))
     }
 }

@@ -7,7 +7,8 @@ of tokens.
 
 use std::str::Owned;
 use super::CalcResult;
-use super::operator::{OperatorType, Add, Sub, Mul, Div}; 
+use super::operator;
+use super::operator::{OperatorType}; 
 
 #[deriving(Show)]
 pub enum Token {
@@ -58,18 +59,14 @@ pub fn tokenize(s: &str) -> CalcResult<Vec<Token>> {
         let word = word.slice(0, word.find(|c: char| c == ')' || c == '(').unwrap_or(word.len()));
         
         // Operators are always separated by whitespace from the restant tokens
-        let token = match word {
-            "+" => Some(Operator(Add)),
-            "-" => Some(Operator(Sub)),
-            "*" => Some(Operator(Mul)),
-            "/" => Some(Operator(Div)),
-            _   => None
+        match operator::from_str(word) {
+            Some(op_type) => {
+                tokens.push(Operator(op_type));
+                i += word.len();
+                continue;
+            }
+            _   => { }
         };
-        if token.is_some() {
-            tokens.push(token.unwrap());
-            i += 1;
-            continue;
-        }
         
         // -----------------
         // Literals and names
