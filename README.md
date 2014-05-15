@@ -11,9 +11,10 @@ To compile this you must use the latest nightly build of Rust. Just use `rustc m
 
 After seeing https://github.com/libfud/rcalc, I thought that it would be a good idea to write a little calculator in Rust. However, my focus is mainly placed on making a parser and generating an AST (Abstract Syntax Tree), rather than having a good calculator, so don't expect features like arbitrary precision and such things. I have written it from scratch, trying to do it in an idiomatic way, so I hope it can also be useful for the ones wanting to learn Rust.
 
-## Future
+## Features
 
-Since this is mostly an experiment, the future is uncertain. At this moment I am planning to add the following features:
+After finishing the parser I thought it would be interesting to enhance the calculator with some features. These are some of them:
 
-* Support for predefined functions (like `sqrt`, `pow`, etc) and constants (like `pi` and `e`).
-* Unit tests
+* Support for predefined functions (`sqrt` and `pow`). Use like `(pow 2 8)`.
+* Support for predefined constants (`pi` and `e`). Use like `(* pi 2)`.
+* Support for if statements and comparison operators. Use like `(if (== 2 2) (+ 5 8) (- 5 8))`. Actually, `if` is a function that takes the first argument as the condition and returns the second if the condition is true. Otherwise it returns the third parameter.
