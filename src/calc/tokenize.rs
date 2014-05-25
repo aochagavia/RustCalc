@@ -16,7 +16,7 @@ pub enum Token {
     LPar,                       // A left parenthesis
     RPar,                       // A right parenthesis
     Operator(OperatorType),     // An operator
-    Name(~str)                  // A name
+    Name(StrBuf)                  // A name
 }
 
 pub fn tokenize(s: &str) -> CalcResult<Vec<Token>> {

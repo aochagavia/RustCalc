@@ -12,7 +12,7 @@ fn main() {
     let mut reader = io::stdin();
     
     for line in reader.lines().map(|l| l.unwrap()) {
-        match eval(line) {
+        match eval(line.as_slice()) {
             Err(msg) => println!("Error: {}", msg),
             Ok(result) => println!("Result: {}", result)
         }
@@ -39,4 +39,11 @@ fn check_valid() {
     assert!(eval("(* 8 4)").unwrap() == 32.);
     assert!(eval("(pow 2 8)").unwrap() == 256.);
     assert!(eval("(sqrt 16)").unwrap() == 4.);
+}
+
+#[test]
+fn check_subexpr() {
+    assert!(eval("(+ (+ 2 3) 5)").unwrap() == 10.);
+    assert!(eval("(* (+ 2 3) 5)").unwrap() == 25.)
+    assert!(eval("(- (+ 2 3) 5)").unwrap() == 0.)
 }
