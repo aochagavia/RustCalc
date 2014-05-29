@@ -16,7 +16,7 @@ pub enum Token {
     LPar,                       // A left parenthesis
     RPar,                       // A right parenthesis
     Operator(OperatorType),     // An operator
-    Name(StrBuf)                  // A name
+    Name(String)                // A name
 }
 
 pub fn tokenize(s: &str) -> CalcResult<Vec<Token>> {
@@ -89,7 +89,7 @@ pub fn tokenize(s: &str) -> CalcResult<Vec<Token>> {
         
         // A name token
         if c.is_alphabetic() {
-            tokens.push(Name(word.to_owned()));
+            tokens.push(Name(word.to_string()));
             i += word.len();
             continue;
         }
