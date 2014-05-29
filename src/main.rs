@@ -47,3 +47,16 @@ fn check_subexpr() {
     assert!(eval("(* (+ 2 3) 5)").unwrap() == 25.)
     assert!(eval("(- (+ 2 3) 5)").unwrap() == 0.)
 }
+
+#[test]
+fn check_negative() {
+    assert!(eval("(+ -5 -5)").unwrap() == -10.);
+    assert!(eval("(+ -5 8)").unwrap() == 3.);
+}
+
+#[test]
+fn check_constants() {
+    assert!(eval("(* pi 2)").unwrap() > 6.);
+    assert!(eval("(* e 2)").unwrap() > 4.);
+    assert!(eval("(* 2 e)").unwrap() > 4.);
+}
