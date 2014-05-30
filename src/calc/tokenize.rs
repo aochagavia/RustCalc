@@ -5,10 +5,12 @@ of tokens.
 
 */
 
+use std::str;
 use std::str::Owned;
 use super::CalcResult;
 use super::operator;
-use super::operator::{OperatorType}; 
+use super::operator::OperatorType; 
+use super::buffer::Buffer;
 
 #[deriving(Show)]
 pub enum Token {
@@ -20,31 +22,27 @@ pub enum Token {
 }
 
 pub fn tokenize(s: &str) -> CalcResult<Vec<Token>> {
+    let mut buf = Buffer::new(s.chars());
     let mut tokens = Vec::new();
-    
-    let mut i = 0;
-    let len = s.len();
 
-    while i < len {
-        let slice = s.slice_from(i);
-        
+    while !buf.is_empty() {
         // Skip whitespace
-        if slice.chars().next().unwrap().is_whitespace() {
-            i += 1;
+        if buf.peek().unwrap().is_whitespace() {
+            buf.pop();
             continue;
         }
         
         // -----------
         // Parentheses
         // -----------
-        let token = match slice.chars().next().unwrap() {
+        let token = match buf.peek().unwrap() {
             '(' => Some(LPar),
             ')' => Some(RPar),
             _   => None
         };
         if token.is_some() {
             tokens.push(token.unwrap());
-            i += 1;
+            buf.pop();
             continue;
         }
         
@@ -52,17 +50,13 @@ pub fn tokenize(s: &str) -> CalcResult<Vec<Token>> {
         // Operators
         // ---------
         
-        // We know that there is at least one word, so we can safely unwrap it
-        let word = slice.words().next().unwrap();
-        
-        // Discard parentheses at the end if present
-        let word = word.slice(0, word.find(|c: char| c == ')' || c == '(').unwrap_or(word.len()));
+        // We know that there is at least one word
+        let word = str::from_chars(buf.take_until(|&c| c.is_whitespace() || c == ')' || c == '(').as_slice());
         
         // Operators are always separated by whitespace from the restant tokens
-        match operator::from_str(word) {
+        match operator::from_str(word.as_slice()) {
             Some(op_type) => {
                 tokens.push(Operator(op_type));
-                i += word.len();
                 continue;
             }
             _   => { }
@@ -73,14 +67,13 @@ pub fn tokenize(s: &str) -> CalcResult<Vec<Token>> {
         // -----------------
         
         // We know that a word has at least one character, so we can safely unwrap it
-        let c = word.chars().next().unwrap();
+        let c = word.as_slice().chars().next().unwrap();
         
         // A literal token
         if c.is_digit() || c == '-' {        
-            match from_str::<f64>(word) {
+            match from_str::<f64>(word.as_slice()) {
                 Some(x) => {
                     tokens.push(Literal(x));
-                    i += word.len();
                     continue;
                 }
                 None => { return Err(Owned(format!("Invalid number '{}'", word))); }
@@ -89,8 +82,7 @@ pub fn tokenize(s: &str) -> CalcResult<Vec<Token>> {
         
         // A name token
         if c.is_alphabetic() {
-            tokens.push(Name(word.to_string()));
-            i += word.len();
+            tokens.push(Name(word));
             continue;
         }
 
