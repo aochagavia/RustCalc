@@ -71,6 +71,9 @@ mod tests {
         // Define a variable and use it
         run("(set myVar 700)", &mut env).unwrap();
         assert!(run("(* myVar 2)", &mut env).unwrap() == 1400.0);
+        
+        // Try defining two times
+        run("(set myVar 800)", &mut env).unwrap();
     }
 
     #[test]

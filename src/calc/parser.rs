@@ -28,7 +28,7 @@ pub fn parse(token_slice: &[Token]) -> CalcResult<AST> {
     }
 }
 
-pub fn parse_line<'a, T: Iterator<&'a Token>>(tokens: &mut T) -> CalcResult<AST> {
+fn parse_line<'a, T: Iterator<&'a Token>>(tokens: &mut T) -> CalcResult<AST> {
     // Depending on the first token, we parse an expression or a statement
     match tokens.next() {
         Some(&scanner::Operator(op)) => {
@@ -51,7 +51,7 @@ pub fn parse_line<'a, T: Iterator<&'a Token>>(tokens: &mut T) -> CalcResult<AST>
     }
 }
 
-pub fn parse_whole_expression<'a, T: Iterator<&'a Token>>(tokens: &mut T)
+fn parse_whole_expression<'a, T: Iterator<&'a Token>>(tokens: &mut T)
         -> CalcResult<Expression>
 {
     match tokens.next() {
@@ -65,7 +65,7 @@ pub fn parse_whole_expression<'a, T: Iterator<&'a Token>>(tokens: &mut T)
     }
 }
 
-pub fn parse_expression<'a, T: Iterator<&'a Token>>(tokens: &mut T, top_expr: ExprType)
+fn parse_expression<'a, T: Iterator<&'a Token>>(tokens: &mut T, top_expr: ExprType)
         -> CalcResult<Expression>
 {
     // Here we will save the arguments of the expression
@@ -108,9 +108,32 @@ pub fn parse_expression<'a, T: Iterator<&'a Token>>(tokens: &mut T, top_expr: Ex
     }
 }
 
-pub fn parse_statement<'a, T: Iterator<&'a Token>>(tokens: &mut T, top_stmt: StmtType)
+fn parse_statement<'a, T: Iterator<&'a Token>>(tokens: &mut T, top_stmt: StmtType)
         -> CalcResult<Statement>
 {
-    // FIXME: Todo
-    fail!()
+    match top_stmt {
+        FuncDef => fail!("Function definition is not yet implemented"), // FIXME
+        Assign  => {
+            parse_assign(tokens)
+        }
+    }
+}
+
+fn parse_assign<'a, T: Iterator<&'a Token>>(tokens: &mut T) -> CalcResult<Statement> {
+    // The first token will be the name of the variable
+    let name = match tokens.next() {
+        Some(&Name(ref n)) => n.clone(),
+        Some(ref t)        => return Err(Owned(format!("Unexpected {} expecting Name", t))),
+        None               => return Err(Slice("Unexpected end of token-stream"))
+    };
+    
+    // The second token will be a number or a sub-expression
+    let rhs = match tokens.next() {
+        Some(&LPar)       => try!(parse_whole_expression(tokens)),
+        Some(&Literal(x)) => Expression::from_type(Number(x)),
+        Some(ref t)       => return Err(Owned(format!("Unexpected {} expecting LPar or Literal", t))),
+        None              => return Err(Slice("Unexpected end of token-stream"))
+    };
+    
+    Ok(Statement { stmt_type: Assign, name: name, rhs: rhs })
 }

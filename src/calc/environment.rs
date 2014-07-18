@@ -21,24 +21,12 @@ impl Environment {
         Environment { functions: HashMap::new(), variables: HashMap::new() }
     }
 
-    pub fn set_fn(&mut self, name: &str, function: Function) -> CalcResult<()> {
-        let key = name.to_string();
-        if self.functions.contains_key(&key) {
-            Err(Slice("The function already exists"))
-        } else {
-            self.functions.insert(key, function);
-            Ok(())
-        }
+    pub fn set_fn(&mut self, name: &str, function: Function) {
+        self.functions.insert(name.to_string(), function);
     }
 
-    pub fn set_var(&mut self, name: &str, value: f64) -> CalcResult<()> {
-        let key = name.to_string();
-        if self.variables.contains_key(&key) {
-           Err(Slice("The variable already exists"))
-        } else {
-            self.variables.insert(key, value);
-            Ok(())
-        }
+    pub fn set_var(&mut self, name: &str, value: f64) {
+        self.variables.insert(name.to_string(), value);
     }
 
     pub fn get_fn(&self, name: &str) -> Option<Function> {
