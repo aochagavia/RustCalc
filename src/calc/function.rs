@@ -21,7 +21,7 @@ pub fn eval(f_type: FunctionType, args: &Vec<Box<Evaluate>>) -> CalcResult {
             if args.len() != 1 {
                 Err(Slice("'sqrt' requires one argument"))
             } else {
-                let x = try!(args.get(0).eval());
+                let x = try!(args[0].eval());
                 Ok(x.sqrt())
             }
         }
@@ -29,8 +29,8 @@ pub fn eval(f_type: FunctionType, args: &Vec<Box<Evaluate>>) -> CalcResult {
             if args.len() != 2 {
                 Err(Slice("'pow' requires two arguments"))
             } else {
-                let base = try!(args.get(0).eval());
-                let exponent = try!(args.get(1).eval());
+                let base = try!(args[0].eval());
+                let exponent = try!(args[1].eval());
                 Ok(base.powf(exponent))
             }
         }
@@ -38,13 +38,13 @@ pub fn eval(f_type: FunctionType, args: &Vec<Box<Evaluate>>) -> CalcResult {
             if args.len() != 3 {
                 Err(Slice("'if' requires three arguments"))
             } else {
-                let condition = try!(args.get(0).eval());
+                let condition = try!(args[0].eval());
                 
                 // 0 means false, other means true
                 if condition == 0. {
-                    Ok(try!(args.get(2).eval()))
+                    Ok(try!(args[2].eval()))
                 } else {
-                    Ok(try!(args.get(1).eval()))
+                    Ok(try!(args[1].eval()))
                 }
             }
         }

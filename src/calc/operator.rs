@@ -59,7 +59,7 @@ pub fn eval(op_type: OperatorType, args: &Vec<Box<Evaluate>>) -> CalcResult {
             if args.len() == 0 {
                 return Err(Slice("Substraction requires at least one argument"));
             }
-            let first_arg = args.get(0).eval();
+            let first_arg = args[0].eval();
             args.slice_from(1).iter().fold(first_arg, |acc, x| {
                 combine(acc, x.eval(), |v1, v2| v1 - v2)
             })
@@ -73,7 +73,7 @@ pub fn eval(op_type: OperatorType, args: &Vec<Box<Evaluate>>) -> CalcResult {
             if args.len() != 2 {
                 return Err(Slice("Division requires two arguments"));
             }
-            let first_arg = args.get(0).eval();
+            let first_arg = args[0].eval();
             if args.slice_from(1).iter().any(|x| x.eval() == Ok(0.0)) {
                 return Err(Slice("Cannot divide by 0"));
             }
@@ -87,7 +87,7 @@ pub fn eval(op_type: OperatorType, args: &Vec<Box<Evaluate>>) -> CalcResult {
             }
             
             let mut equal = false;
-            let first = try!(args.get(0).eval());
+            let first = try!(args[0].eval());
             for x in args.slice_from(1).iter() {
                 equal = equal && try!(x.eval()) == first;
             }
@@ -98,7 +98,7 @@ pub fn eval(op_type: OperatorType, args: &Vec<Box<Evaluate>>) -> CalcResult {
             if args.len() != 2 {
                 return Err(Slice("< requires two arguments"));
             }
-            let (arg1, arg2) = (try!(args.get(0).eval()), try!(args.get(1).eval()));
+            let (arg1, arg2) = (try!(args[0].eval()), try!(args[1].eval()));
             Ok(bool_to_f64(arg1 < arg2))
         }
         LtEq => {
@@ -111,7 +111,7 @@ pub fn eval(op_type: OperatorType, args: &Vec<Box<Evaluate>>) -> CalcResult {
             if args.len() != 2 {
                 return Err(Slice("> requires two arguments"));
             }
-            let (arg1, arg2) = (try!(args.get(0).eval()), try!(args.get(1).eval()));
+            let (arg1, arg2) = (try!(args[0].eval()), try!(args[1].eval()));
             Ok(bool_to_f64(arg1 > arg2))
         }
         GtEq => {

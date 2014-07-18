@@ -5,7 +5,6 @@ of tokens.
 
 */
 
-use std::str;
 use std::str::Owned;
 use super::CalcResult;
 use super::operator;
@@ -51,7 +50,7 @@ pub fn tokenize(s: &str) -> CalcResult<Vec<Token>> {
         // ---------
         
         // We know that there is at least one word
-        let word = str::from_chars(buf.take_until(|&c| c.is_whitespace() || c == ')' || c == '(').as_slice());
+        let word = String::from_chars(buf.take_until(|&c| c.is_whitespace() || c == ')' || c == '(').as_slice());
         
         // Operators are always separated by whitespace from the restant tokens
         match operator::from_str(word.as_slice()) {
