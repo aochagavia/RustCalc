@@ -15,6 +15,7 @@ After seeing https://github.com/libfud/rcalc, I thought that it would be a good 
 
 After finishing the parser I thought it would be interesting to enhance the calculator with some features. These are some of them:
 
-* Support for predefined functions (`sqrt` and `pow`). Use like `(pow 2 8)`.
-* Support for predefined constants (`pi` and `e`). Use like `(* pi 2)`.
-* Support for if statements and comparison operators. Use like `(if (== 2 2) (+ 5 8) (- 5 8))`. Actually, `if` is a function that takes the first argument as the condition and returns the second if the condition is true. Otherwise it returns the third parameter.
+* Predefined functions (`sqrt` and `pow`). Example: `(pow 2 8)`.
+* Predefined constants (`pi` and `e`). Example: `(* pi 2)`.
+* User-defined variables. Example: `(set myVar 42)`, `(+ myVar 3)`.
+* `If` statements and comparison operators. Example: `(if (== 2 2) (+ 5 8) (- 5 8))`. Actually, `if` is a function that takes the first argument as the condition and returns the second if the condition is true. Otherwise it returns the third parameter.
