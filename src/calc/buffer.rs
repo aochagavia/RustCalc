@@ -13,7 +13,7 @@ impl<T: Copy, U: Iterator<T>> Buffer<T, U> {
     pub fn new(chars: U) -> Buffer<T, U> {
         Buffer { stack: vec![], iterator: chars }
     }
-    
+
     pub fn is_empty(&mut self) -> bool {
         match self.pop() {
             Some(c) => {
@@ -36,7 +36,7 @@ impl<T: Copy, U: Iterator<T>> Buffer<T, U> {
             }
         }
     }
-    
+
     pub fn peek(&mut self) -> Option<T> {
         match self.stack.pop() {
             Some(c) => {
@@ -46,11 +46,11 @@ impl<T: Copy, U: Iterator<T>> Buffer<T, U> {
             None    => None
         }
     }
-    
+
     pub fn pop(&mut self) -> Option<T> {
         self.stack.pop().or_else(|| self.iterator.next())
     }
-    
+
     pub fn push(&mut self, elem: T) {
         self.stack.push(elem);
     }

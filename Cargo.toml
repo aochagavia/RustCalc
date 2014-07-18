@@ -1,0 +1,5 @@
+[package]
+
+name = "RustCalc"
+version = "0.1.0"
+authors = [ "aochagavia92@gmail.com" ]

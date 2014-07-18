@@ -4,39 +4,59 @@ Implements an expression struct which can be evaluated.
 
 */
 
-use super::{CalcResult, Evaluate};
-use super::function;
-use super::function::FunctionType;
-use super::operator;
-use super::operator::OperatorType;
-
-// Shortcut to combine two Results and return a new one
-// If both results contain an Ok value, the given function will be applied
-// Otherwise, the first error found will be returned
-pub fn combine(opt1: CalcResult, opt2: CalcResult, func: |f64, f64| -> f64) -> CalcResult {
-    let (v1, v2) = (try!(opt1), try!(opt2));
-    Ok(func(v1, v2))
-}
+use super::CalcResult;
+use super::environment::Environment;
+use super::function::Function;
+use super::operator::Operator;
+use super::constant::Constant;
 
 #[deriving(Show)]
 pub enum ExprType {
-    Operator(OperatorType),
-    Function(FunctionType)
+    Operator(Operator),
+    Function(String),
+    Number(f64),
+    Variable(String)
 }
 
 pub struct Expression {
     pub expr_type: ExprType,
-    pub args: Vec<Box<Evaluate>>
+    pub args: Vec<Expression>
 }
 
-impl Evaluate for Expression {
-    fn eval(&self) -> CalcResult {
+impl Expression {
+    pub fn from_type(ty: ExprType) -> Expression {
+        Expression { expr_type: ty, args: vec![] }
+    }
+
+    pub fn eval(&self, env: &Environment) -> CalcResult {
         match self.expr_type {
-            Operator(op_type) => {
-                operator::eval(op_type, &self.args)
+            Operator(op) => {
+                op.eval(self.args.as_slice(), env)
             }
-            Function(f_type) => {
-                function::eval(f_type, &self.args)
+            Function(ref name) => {
+                // Check if the function has been defined by the user
+                match env.get_fn(name.as_slice()) {
+                    Some(f) => return f.eval(self.args.as_slice(), env),
+                    None    => ()
+                }
+
+                // Otherwise, treat it as a predefined function
+                Function::from_str(name.as_slice())
+                    .and_then(|f| f.eval(self.args.as_slice(), env))
+            }
+            Number(x) => {
+                Ok(x)
+            }
+            Variable(ref name) => {
+                // Check if the variable has been defined by the user
+                match env.get_var(name.as_slice()) {
+                    Some(v) => return Ok(v),
+                    None    => ()
+                }
+
+                // Otherwise, treat it as a constant
+                Constant::from_str(name.as_slice())
+                    .and_then(|c| c.eval())
             }
         }
     }

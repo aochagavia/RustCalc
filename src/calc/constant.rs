@@ -5,7 +5,7 @@ Implements the constants of the calculator.
 */
 
 use std::str::Owned;
-use super::{Evaluate, CalcResult};
+use super::CalcResult;
 
 #[deriving(Show)]
 pub enum ConstantType {
@@ -23,12 +23,10 @@ impl Constant {
             _    => Err(Owned(format!("Undefined constant '{}'", s)))
         }
     }
-}
 
-impl Evaluate for Constant {
-    fn eval(&self) -> CalcResult {
-        let &Constant(c_type) = self;
-        match c_type {
+    pub fn eval(&self) -> CalcResult {
+        let &Constant(c) = self;
+        match c {
             Pi => Ok(3.14159265359),
             E  => Ok(2.71828182846)
         }
