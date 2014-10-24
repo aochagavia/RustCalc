@@ -1,3 +1,4 @@
 *.exe
 /target
 */doc/
+Cargo.lock

@@ -8,15 +8,13 @@ expression is evaluated.
 
 use std::str::{Slice, Owned};
 use super::CalcResult;
-use super::scanner;
-use super::scanner::{Token, Literal, LPar, RPar, Name, Keyword, Set, Def};
-use super::expression;
-use super::expression::{Expression, ExprType, Function, Number, Variable};
-use super::statement::{Statement, StmtType, Assign, FuncDef};
+use super::scanner::{mod, Token, Literal, LPar, RPar, Name, TKeyword, Set, Def};
+use super::expression::{mod, ExprType, Function, Number, Variable};
+use super::statement::{mod, StmtType, Assign, FuncDef};
 
 pub enum AST {
-    Expression(Expression),
-    Statement(Statement)
+    Expression(expression::Expression),
+    Statement(statement::Statement)
 }
 
 pub fn parse(token_slice: &[Token]) -> CalcResult<AST> {
@@ -39,7 +37,7 @@ fn parse_line<'a, T: Iterator<&'a Token>>(tokens: &mut T) -> CalcResult<AST> {
             parse_expression(tokens, Function(func_name.clone()))
                 .map(|e| Expression(e))
         }
-        Some(&Keyword(k)) => {
+        Some(&TKeyword(k)) => {
             match k {
                 Set => parse_statement(tokens, Assign)
                            .map(|s| Statement(s)),
@@ -52,7 +50,7 @@ fn parse_line<'a, T: Iterator<&'a Token>>(tokens: &mut T) -> CalcResult<AST> {
 }
 
 fn parse_whole_expression<'a, T: Iterator<&'a Token>>(tokens: &mut T)
-        -> CalcResult<Expression>
+        -> CalcResult<expression::Expression>
 {
     match tokens.next() {
         Some(&scanner::Operator(op)) => {
@@ -66,10 +64,10 @@ fn parse_whole_expression<'a, T: Iterator<&'a Token>>(tokens: &mut T)
 }
 
 fn parse_expression<'a, T: Iterator<&'a Token>>(tokens: &mut T, top_expr: ExprType)
-        -> CalcResult<Expression>
+        -> CalcResult<expression::Expression>
 {
     // Here we will save the arguments of the expression
-    let mut args: Vec<Expression> = vec![];
+    let mut args: Vec<expression::Expression> = vec![];
 
     // Go through the restant tokens and translate the arguments into structs
     loop {
@@ -85,7 +83,7 @@ fn parse_expression<'a, T: Iterator<&'a Token>>(tokens: &mut T, top_expr: ExprTy
             // Here ends an expression
             RPar => {
                 // We make a new Expression based on the Expression type and the arguments
-                return Ok(Expression{ expr_type: top_expr, args: args });
+                return Ok(expression::Expression{ expr_type: top_expr, args: args });
             }
             // Operator
             scanner::Operator(op) => {
@@ -93,15 +91,15 @@ fn parse_expression<'a, T: Iterator<&'a Token>>(tokens: &mut T, top_expr: ExprTy
             }
             // A number to be used as argument for an Expression
             Literal(x) => {
-                let number = Expression::from_type(Number(x));
+                let number = expression::Expression::from_type(Number(x));
                 args.push(number);
             }
             // The name of a constant or variable
             Name(ref name) => {
-                let var = Expression::from_type(Variable(name.clone()));
+                let var = expression::Expression::from_type(Variable(name.clone()));
                 args.push(var);
             }
-            Keyword(k) => {
+            TKeyword(k) => {
                 return Err(Owned(format!("Keyword '{}' in wrong position", k)));
             }
         }
@@ -109,7 +107,7 @@ fn parse_expression<'a, T: Iterator<&'a Token>>(tokens: &mut T, top_expr: ExprTy
 }
 
 fn parse_statement<'a, T: Iterator<&'a Token>>(tokens: &mut T, top_stmt: StmtType)
-        -> CalcResult<Statement>
+        -> CalcResult<statement::Statement>
 {
     match top_stmt {
         FuncDef => fail!("Function definition is not yet implemented"), // FIXME
@@ -119,7 +117,7 @@ fn parse_statement<'a, T: Iterator<&'a Token>>(tokens: &mut T, top_stmt: StmtTyp
     }
 }
 
-fn parse_assign<'a, T: Iterator<&'a Token>>(tokens: &mut T) -> CalcResult<Statement> {
+fn parse_assign<'a, T: Iterator<&'a Token>>(tokens: &mut T) -> CalcResult<statement::Statement> {
     // The first token will be the name of the variable
     let name = match tokens.next() {
         Some(&Name(ref n)) => n.clone(),
@@ -130,10 +128,10 @@ fn parse_assign<'a, T: Iterator<&'a Token>>(tokens: &mut T) -> CalcResult<Statem
     // The second token will be a number or a sub-expression
     let rhs = match tokens.next() {
         Some(&LPar)       => try!(parse_whole_expression(tokens)),
-        Some(&Literal(x)) => Expression::from_type(Number(x)),
+        Some(&Literal(x)) => expression::Expression::from_type(Number(x)),
         Some(ref t)       => return Err(Owned(format!("Unexpected {} expecting LPar or Literal", t))),
         None              => return Err(Slice("Unexpected end of token-stream"))
     };
     
-    Ok(Statement { stmt_type: Assign, name: name, rhs: rhs })
+    Ok(statement::Statement { stmt_type: Assign, name: name, rhs: rhs })
 }

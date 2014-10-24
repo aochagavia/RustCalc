@@ -7,7 +7,7 @@ of tokens.
 
 use std::str::Owned;
 use super::CalcResult;
-use super::operator::Operator;
+use super::operator;
 use super::buffer::Buffer;
 
 #[deriving(Show)]
@@ -15,9 +15,9 @@ pub enum Token {
     Literal(f64),               // A number
     LPar,                       // A left parenthesis
     RPar,                       // A right parenthesis
-    Operator(Operator),         // An operator
+    Operator(operator::Operator),        // An operator
     Name(String),               // A name
-    Keyword(Keyword),            // A keyword
+    TKeyword(Keyword),          // A keyword
 }
 
 #[deriving(Show)]
@@ -59,7 +59,7 @@ pub fn scan(s: &str) -> CalcResult<Vec<Token>> {
         let word = String::from_chars(buf.take_until(|&c| c.is_whitespace() || c == ')' || c == '(').as_slice());
 
         // Operators are always separated by whitespace from the restant tokens
-        match Operator::from_str(word.as_slice()) {
+        match operator::Operator::from_str(word.as_slice()) {
             Some(op_type) => {
                 tokens.push(Operator(op_type));
                 continue;
@@ -89,8 +89,8 @@ pub fn scan(s: &str) -> CalcResult<Vec<Token>> {
         if c.is_alphabetic() {
             // It can be a keyword or a name
             match word.as_slice() {
-                "set" => tokens.push(Keyword(Set)),
-                "def" => tokens.push(Keyword(Def)),
+                "set" => tokens.push(TKeyword(Set)),
+                "def" => tokens.push(TKeyword(Def)),
                 _     => tokens.push(Name(word))
             }
 

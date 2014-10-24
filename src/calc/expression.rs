@@ -6,13 +6,13 @@ Implements an expression struct which can be evaluated.
 
 use super::CalcResult;
 use super::environment::Environment;
-use super::function::Function;
-use super::operator::Operator;
+use super::operator;
 use super::constant::Constant;
+use super::function;
 
 #[deriving(Show)]
 pub enum ExprType {
-    Operator(Operator),
+    Operator(operator::Operator),
     Function(String),
     Number(f64),
     Variable(String)
@@ -41,7 +41,7 @@ impl Expression {
                 }
 
                 // Otherwise, treat it as a predefined function
-                Function::from_str(name.as_slice())
+                function::Function::from_str(name.as_slice())
                     .and_then(|f| f.eval(self.args.as_slice(), env))
             }
             Number(x) => {
