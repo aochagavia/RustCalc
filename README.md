@@ -3,9 +3,9 @@ RustCalc
 
 RustCalc is a polish notation calculator (see http://en.wikipedia.org/wiki/Polish_notation). This means that you must write the operation first and the arguments later, like in `(+ 2 3)` or `(- 10 (* 2 6) 5)`. The reason of this is that it is easier to parse.
 
-## Compiling
+## Running
 
-To compile this you must use the latest nightly build of Rust. Just use `rustc main.rs` and it should work.
+`cargo run --release`
 
 ## Goals
 

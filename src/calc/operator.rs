@@ -4,13 +4,12 @@ Implements the operators of the calculator.
 
 */
 
-use std::str::Slice;
 use super::CalcResult;
 use super::expression::Expression;
 use super::environment::Environment;
 use super::util::combine;
 
-#[deriving(Show)]
+#[derive(Clone, Copy, Debug)]
 pub enum Operator {
     Add,
     Sub,
@@ -26,6 +25,7 @@ pub enum Operator {
 
 impl Operator {
     pub fn eval(&self, args: &[Expression], env: &Environment) -> CalcResult {
+        use self::Operator::*;
         match *self {
             Add => {
                 args.iter().fold(Ok(0.0), |acc, x| {
@@ -34,10 +34,10 @@ impl Operator {
             }
             Sub => {
                 if args.len() == 0 {
-                    return Err(Slice("Substraction requires at least one argument"));
+                    return Err("Substraction requires at least one argument".into());
                 }
                 let first_arg = args[0].eval(env);
-                args.slice_from(1).iter().fold(first_arg, |acc, x| {
+                args[1..].iter().fold(first_arg, |acc, x| {
                     combine(acc, x.eval(env), |v1, v2| v1 - v2)
                 })
             }
@@ -48,24 +48,24 @@ impl Operator {
             }
             Div => {
                 if args.len() != 2 {
-                    return Err(Slice("Division requires two arguments"));
+                    return Err("Division requires two arguments".into());
                 }
                 let first_arg = args[0].eval(env);
-                if args.slice_from(1).iter().any(|x| x.eval(env) == Ok(0.0)) {
-                    return Err(Slice("Cannot divide by 0"));
+                if args[1..].iter().any(|x| x.eval(env) == Ok(0.0)) {
+                    return Err("Cannot divide by 0".into());
                 }
-                args.slice_from(1).iter().fold(first_arg, |acc, x| {
+                args[1..].iter().fold(first_arg, |acc, x| {
                     combine(acc, x.eval(env), |v1, v2| v1 / v2)
                 })
             }
             Eq => {
                 if args.len() < 2 {
-                    return Err(Slice("== requires at least two arguments"));
+                    return Err("== requires at least two arguments".into());
                 }
 
                 let mut equal = false;
                 let first = try!(args[0].eval(env));
-                for x in args.slice_from(1).iter() {
+                for x in &args[1..] {
                     equal = equal && try!(x.eval(env)) == first;
                 }
 
@@ -73,51 +73,51 @@ impl Operator {
             }
             Lt => {
                 if args.len() != 2 {
-                    return Err(Slice("< requires two arguments"));
+                    return Err("< requires two arguments".into());
                 }
                 let (arg1, arg2) = (try!(args[0].eval(env)), try!(args[1].eval(env)));
                 Ok(bool_to_f64(arg1 < arg2))
             }
             LtEq => {
                 if args.len() != 2 {
-                    return Err(Slice("<= requires two arguments"));
+                    return Err("<= requires two arguments".into());
                 }
-                Gt.eval(args, env).map(negate_f64)
+                Operator::Gt.eval(args, env).map(negate_f64)
             }
             Gt => {
                 if args.len() != 2 {
-                    return Err(Slice("> requires two arguments"));
+                    return Err("> requires two arguments".into());
                 }
                 let (arg1, arg2) = (try!(args[0].eval(env)), try!(args[1].eval(env)));
                 Ok(bool_to_f64(arg1 > arg2))
             }
             GtEq => {
                 if args.len() != 2 {
-                    return Err(Slice(">= requires two arguments"));
+                    return Err(">= requires two arguments".into());
                 }
-                Lt.eval(args, env).map(negate_f64)
+                Operator::Lt.eval(args, env).map(negate_f64)
             }
             NotEq => {
                 if args.len() != 2 {
-                    return Err(Slice("!= requires two arguments"));
+                    return Err("!= requires two arguments".into());
                 }
-                Eq.eval(args, env).map(negate_f64)
+                Operator::Eq.eval(args, env).map(negate_f64)
             }
         }
     }
 
     pub fn from_str(s: &str) -> Option<Operator> {
         match s {
-            "+"  => Some(Add),
-            "-"  => Some(Sub),
-            "*"  => Some(Mul),
-            "/"  => Some(Div),
-            "==" => Some(Eq),
-            "<"  => Some(Lt),
-            "<=" => Some(LtEq),
-            ">"  => Some(Gt),
-            ">=" => Some(GtEq),
-            "!=" => Some(NotEq),
+            "+"  => Some(Operator::Add),
+            "-"  => Some(Operator::Sub),
+            "*"  => Some(Operator::Mul),
+            "/"  => Some(Operator::Div),
+            "==" => Some(Operator::Eq),
+            "<"  => Some(Operator::Lt),
+            "<=" => Some(Operator::LtEq),
+            ">"  => Some(Operator::Gt),
+            ">=" => Some(Operator::GtEq),
+            "!=" => Some(Operator::NotEq),
             _    => None
         }
     }

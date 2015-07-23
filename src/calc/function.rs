@@ -4,13 +4,11 @@ Implements the functions of the calculator.
 
 */
 
-use std::num::Float;
-use std::str::{Slice, Owned};
 use super::CalcResult;
 use super::expression::Expression;
 use super::environment::Environment;
 
-#[deriving(Show)]
+#[derive(Clone, Copy, Debug)]
 pub enum Function {
     Sqrt,
     Pow,
@@ -20,26 +18,26 @@ pub enum Function {
 impl Function {
     pub fn eval(&self, args: &[Expression], env: &Environment) -> CalcResult {
         match *self {
-            Sqrt => {
+            Function::Sqrt => {
                 if args.len() != 1 {
-                    Err(Slice("'sqrt' requires one argument"))
+                    Err("'sqrt' requires one argument".into())
                 } else {
                     let x = try!(args[0].eval(env));
                     Ok(x.sqrt())
                 }
             }
-            Pow => {
+            Function::Pow => {
                 if args.len() != 2 {
-                    Err(Slice("'pow' requires two arguments"))
+                    Err("'pow' requires two arguments".into())
                 } else {
                     let base = try!(args[0].eval(env));
                     let exponent = try!(args[1].eval(env));
                     Ok(base.powf(exponent))
                 }
             }
-            If => {
+            Function::If => {
                 if args.len() != 3 {
-                    Err(Slice("'if' requires three arguments"))
+                    Err("'if' requires three arguments".into())
                 } else {
                     let condition = try!(args[0].eval(env));
 
@@ -56,10 +54,10 @@ impl Function {
 
     pub fn from_str(s: &str) -> CalcResult<Function> {
         match s {
-            "sqrt" => Ok(Sqrt),
-            "pow"  => Ok(Pow),
-            "if"   => Ok(If),
-            _      => Err(Owned(format!("Unknown function '{}'", s)))
+            "sqrt" => Ok(Function::Sqrt),
+            "pow"  => Ok(Function::Pow),
+            "if"   => Ok(Function::If),
+            _      => Err(format!("Unknown function '{}'", s).into())
         }
     }
 }

@@ -7,9 +7,10 @@ implemented.
 
 */
 
-use std::str;
+use std::borrow::Cow;
+
 pub use self::environment::Environment;
-use self::parser::{Expression, Statement};
+use self::parser::AST;
 
 mod scanner;
 mod parser;
@@ -23,27 +24,27 @@ mod buffer;
 mod util;
 
 // A shortcut for the result type that is used everywhere
-pub type CalcResult<T = f64> = Result<T, str::MaybeOwned<'static>>;
+pub type CalcResult<T = f64> = Result<T, Cow<'static, str>>;
 
 // Evaluates a string
 pub fn eval(s: &str) -> CalcResult {
     let tokens = try!(scanner::scan(s.trim()));
-    let ast = try!(parser::parse(tokens.as_slice()));
+    let ast = try!(parser::parse(&tokens));
 
     let mut env = Environment::new();
     match ast {
-        Expression(e) => e.eval(&env),
-        Statement(s)  => s.exec(&mut env).map(|_| 0.)
+        AST::Expression(e) => e.eval(&env),
+        AST::Statement(s)  => s.exec(&mut env).map(|_| 0.)
     }
 }
 
 // Runs the code contained in a string, using the given environment
 pub fn run(s: &str, env: &mut Environment) -> CalcResult {
     let tokens = try!(scanner::scan(s.trim()));
-    let ast = try!(parser::parse(tokens.as_slice()));
+    let ast = try!(parser::parse(&tokens));
 
     match ast {
-        Expression(e) => e.eval(env),
-        Statement(s)  => s.exec(env).map(|_| 0.)
+        AST::Expression(e) => e.eval(env),
+        AST::Statement(s)  => s.exec(env).map(|_| 0.)
     }
 }

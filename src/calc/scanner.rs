@@ -5,22 +5,23 @@ of tokens.
 
 */
 
-use std::str::Owned;
+use std::char;
+
 use super::CalcResult;
-use super::operator;
+use super::operator::Operator;
 use super::buffer::Buffer;
 
-#[deriving(Show)]
+#[derive(Clone, Debug)]
 pub enum Token {
     Literal(f64),               // A number
     LPar,                       // A left parenthesis
     RPar,                       // A right parenthesis
-    Operator(operator::Operator),        // An operator
+    Operator(Operator),         // An operator
     Name(String),               // A name
     TKeyword(Keyword),          // A keyword
 }
 
-#[deriving(Show)]
+#[derive(Clone, Copy, Debug)]
 pub enum Keyword {
     Set,
     Def
@@ -41,8 +42,8 @@ pub fn scan(s: &str) -> CalcResult<Vec<Token>> {
         // Parentheses
         // -----------
         let token = match buf.peek().unwrap() {
-            '(' => Some(LPar),
-            ')' => Some(RPar),
+            '(' => Some(Token::LPar),
+            ')' => Some(Token::RPar),
             _   => None
         };
         if token.is_some() {
@@ -56,12 +57,12 @@ pub fn scan(s: &str) -> CalcResult<Vec<Token>> {
         // ---------
 
         // We know that there is at least one word
-        let word = String::from_chars(buf.take_until(|&c| c.is_whitespace() || c == ')' || c == '(').as_slice());
+        let word: String = buf.take_until(|&c| c.is_whitespace() || c == ')' || c == '(').into_iter().collect();
 
         // Operators are always separated by whitespace from the restant tokens
-        match operator::Operator::from_str(word.as_slice()) {
+        match Operator::from_str(&word) {
             Some(op_type) => {
-                tokens.push(Operator(op_type));
+                tokens.push(Token::Operator(op_type));
                 continue;
             }
             _   => { }
@@ -72,33 +73,33 @@ pub fn scan(s: &str) -> CalcResult<Vec<Token>> {
         // -----------------
 
         // We know that a word has at least one character, so we can safely unwrap it
-        let c = word.as_slice().chars().next().unwrap();
+        let c = word.chars().next().unwrap();
 
         // A literal token
-        if c.is_digit() || c == '-' {
-            match from_str::<f64>(word.as_slice()) {
-                Some(x) => {
-                    tokens.push(Literal(x));
+        if char::is_digit(c, 10) || c == '-' {
+            match word.parse::<f64>() {
+                Ok(x) => {
+                    tokens.push(Token::Literal(x));
                     continue;
                 }
-                None => { return Err(Owned(format!("Invalid number '{}'", word))); }
+                _ => { return Err(format!("Invalid number '{}'", word).into()); }
             }
         }
 
         // A name token
         if c.is_alphabetic() {
             // It can be a keyword or a name
-            match word.as_slice() {
-                "set" => tokens.push(TKeyword(Set)),
-                "def" => tokens.push(TKeyword(Def)),
-                _     => tokens.push(Name(word))
+            match &word[..] {
+                "set" => tokens.push(Token::TKeyword(Keyword::Set)),
+                "def" => tokens.push(Token::TKeyword(Keyword::Def)),
+                _     => tokens.push(Token::Name(word))
             }
 
             continue;
         }
 
         // This point is only reached when no token has been matched
-        return Err(Owned(format!("Unrecognized token '{}'", word)));
+        return Err(format!("Unrecognized token '{}'", word).into());
     }
 
     Ok(tokens)

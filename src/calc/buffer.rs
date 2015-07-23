@@ -9,7 +9,7 @@ pub struct Buffer<T, U> {
     iterator: U
 }
 
-impl<T: Copy, U: Iterator<T>> Buffer<T, U> {
+impl<T: Copy, U: Iterator<Item=T>> Buffer<T, U> {
     pub fn new(chars: U) -> Buffer<T, U> {
         Buffer { stack: vec![], iterator: chars }
     }
@@ -24,7 +24,9 @@ impl<T: Copy, U: Iterator<T>> Buffer<T, U> {
         }
     }
 
-    pub fn take_until(&mut self, f: |&T| -> bool) -> Vec<T> {
+    pub fn take_until<F>(&mut self, f: F) -> Vec<T>
+    where F: Fn(&T) -> bool
+    {
         let mut vec = vec![];
         loop {
             match self.pop() {

@@ -16,13 +16,13 @@ pub struct Statement {
 impl Statement {
     pub fn exec(&self, env: &mut Environment) -> CalcResult<()> {
         match self.stmt_type {
-            Assign => {
+            StmtType::Assign => {
                 let rhs = try!(self.rhs.eval(env));
-                env.set_var(self.name.as_slice(), rhs);
+                env.set_var(&self.name, rhs);
                 Ok(())
             }
-            FuncDef => {
-                fail!("Not implemented")
+            StmtType::FuncDef => {
+                panic!("Not implemented")
             }
         }
     }

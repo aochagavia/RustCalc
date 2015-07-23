@@ -1,18 +1,16 @@
-// We need this feature for CalcResult
-#![feature(default_type_params)]
-
 #[cfg(not(test))]
-use std::io;
+use std::io::{self, BufRead};
 
 mod calc;
 
 #[cfg(not(test))]
 fn main() {
-    let mut reader = io::stdin();
+    let stdin = io::stdin();
+    let stdin_lock = stdin.lock();
     let mut env = calc::Environment::new();
 
-    for line in reader.lines().map(|l| l.unwrap_or_else(|_| String::new())) {
-        match calc::run(line.as_slice(), &mut env) {
+    for line in stdin_lock.lines().map(|l| l.unwrap_or_else(|_| String::new())) {
+        match calc::run(&line, &mut env) {
             Err(msg) => println!("Error: {}", msg),
             Ok(result) => println!("Result: {}", result)
         }
@@ -47,8 +45,8 @@ mod tests {
     #[test]
     fn check_subexpr() {
         assert!(eval("(+ (+ 2 3) 5)").unwrap() == 10.);
-        assert!(eval("(* (+ 2 3) 5)").unwrap() == 25.)
-        assert!(eval("(- (+ 2 3) 5)").unwrap() == 0.)
+        assert!(eval("(* (+ 2 3) 5)").unwrap() == 25.);
+        assert!(eval("(- (+ 2 3) 5)").unwrap() == 0.);
     }
 
     #[test]

@@ -10,7 +10,7 @@ use super::operator;
 use super::constant::Constant;
 use super::function;
 
-#[deriving(Show)]
+#[derive(Debug)]
 pub enum ExprType {
     Operator(operator::Operator),
     Function(String),
@@ -30,32 +30,32 @@ impl Expression {
 
     pub fn eval(&self, env: &Environment) -> CalcResult {
         match self.expr_type {
-            Operator(op) => {
-                op.eval(self.args.as_slice(), env)
+            ExprType::Operator(op) => {
+                op.eval(&self.args, env)
             }
-            Function(ref name) => {
+            ExprType::Function(ref name) => {
                 // Check if the function has been defined by the user
-                match env.get_fn(name.as_slice()) {
-                    Some(f) => return f.eval(self.args.as_slice(), env),
+                match env.get_fn(name) {
+                    Some(f) => return f.eval(&self.args, env),
                     None    => ()
                 }
 
                 // Otherwise, treat it as a predefined function
-                function::Function::from_str(name.as_slice())
-                    .and_then(|f| f.eval(self.args.as_slice(), env))
+                function::Function::from_str(name)
+                    .and_then(|f| f.eval(&self.args, env))
             }
-            Number(x) => {
+            ExprType::Number(x) => {
                 Ok(x)
             }
-            Variable(ref name) => {
+            ExprType::Variable(ref name) => {
                 // Check if the variable has been defined by the user
-                match env.get_var(name.as_slice()) {
+                match env.get_var(name) {
                     Some(v) => return Ok(v),
                     None    => ()
                 }
 
                 // Otherwise, treat it as a constant
-                Constant::from_str(name.as_slice())
+                Constant::from_str(name)
                     .and_then(|c| c.eval())
             }
         }
